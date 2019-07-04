@@ -2,17 +2,28 @@ package com.example.notepad;
 
 import android.os.Bundle;
 
+import com.example.notepad.adapters.NotesAdapter;
+import com.example.notepad.model.Note;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
+
+    private RecyclerView recyclerView;
+    private ArrayList<Note> notes;
+    private NotesAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,14 +32,43 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //init recycleView
+        recyclerView = findViewById(R.id.notes_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // init fab button
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+               // TODO: 05/07/2019 add new note
+                onAddNewNote();
             }
         });
+    }
+
+    private void loadNotes() {
+
+        this.notes = new ArrayList<>();
+        for(int i=0;i <12;i++)
+        {
+            notes.add(new Note("this is a demo for notepad this is a demo for notepad this is a demo for notepad "
+            ,
+                    new Date().getTime()));
+        }
+        adapter = new NotesAdapter(this,notes);
+        recyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void onAddNewNote() {
+
+        if(notes != null)
+            notes.add(new Note("this is new note", new Date().getTime()));
+        if(adapter!=null)
+            adapter.notifyDataSetChanged();
+
+
     }
 
     @Override
@@ -51,5 +91,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadNotes();
     }
 }
