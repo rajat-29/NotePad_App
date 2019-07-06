@@ -1,5 +1,6 @@
 package com.example.notepad;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.notepad.adapters.NotesAdapter;
@@ -42,7 +43,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                // TODO: 05/07/2019 add new note
-                onAddNewNote();
+               // onAddNewNote();
+                Intent intent =  new Intent(getApplicationContext(),EditNoteActivity.class);
+                startActivity(intent);
             }
         });
     }
