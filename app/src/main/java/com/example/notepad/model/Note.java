@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey;
 public class Note {
 
     @PrimaryKey(autoGenerate = true)
-    private int id=-1;
+    private int id;
 
     @ColumnInfo(name = "text")
     private String noteText;

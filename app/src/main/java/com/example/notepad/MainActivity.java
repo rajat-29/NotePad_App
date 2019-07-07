@@ -1,12 +1,13 @@
 package com.example.notepad;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,6 +18,7 @@ import com.example.notepad.callbacks.noteEventListener;
 import com.example.notepad.db.NotesDB;
 import com.example.notepad.db.NotesDao;
 import com.example.notepad.model.Note;
+import com.example.notepad.utils.NoteUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -119,9 +121,42 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
 
     // when note is long clicked
     @Override
-    public void onNoteLongClick(Note note) {
+    public void onNoteLongClick(final Note note) {
 
-        Log.d(TAG, "onNoteLongClick :" + note.getId());
+       new AlertDialog.Builder(this)
+               .setTitle(R.string.app_name)
+               .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialogInterface, int i) {
+                       dialogInterface.dismiss();
+                   }
+               })
+               .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialogInterface, int i) {
+
+                       dao.deleteNode(note);  // delete that note
+                       loadNotes(); // refresh the list
+
+                   }
+               })
+               .setNegativeButton("Share", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialogInterface, int i) {
+
+                       Intent shareIntent = new Intent(Intent.ACTION_SEND);
+
+                       String text = note.getNoteText() + "\n Created on : " +
+                               NoteUtils.dateFromLong(note.getNoteDate());
+
+                       shareIntent.setType("text/plain");
+                       shareIntent.putExtra(Intent.EXTRA_TEXT, text);
+                       startActivity(shareIntent);
+
+                   }
+               })
+               .create()
+               .show();
 
     }
 }

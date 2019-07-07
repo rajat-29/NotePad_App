@@ -36,10 +36,6 @@ public class EditNoteActivity extends AppCompatActivity {
 
              inputNote.setText(temp.getNoteText());
          }
-         else
-         {
-             temp = new Note();
-         }
     }
 
     @Override
@@ -69,15 +65,16 @@ public class EditNoteActivity extends AppCompatActivity {
             long date = new Date().getTime(); // to get date and time
 
             //if note is there we will update else we will create new one
-            temp.setNoteText(text);
-            temp.setNoteDate(date);
 
-            if(temp.getId() == -1)
+            if(temp == null)
             {
+                temp = new Note(text,date);
                 dao.insertNode(temp);
             }
             else
             {
+                temp.setNoteText(text);
+                temp.setNoteDate(date);
                 dao.updateNode(temp);
             }
 
