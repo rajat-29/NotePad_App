@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               // TODO: 05/07/2019 add new note
-               // onAddNewNote();
+                // TODO: 05/07/2019 add new note
+                // onAddNewNote();
                 Intent intent =  new Intent(getApplicationContext(),EditNoteActivity.class);
                 startActivity(intent);
             }
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         for(int i=0;i <12;i++)
         {
             notes.add(new Note("this is a demo for notepad this is a demo for notepad this is a demo for notepad "
-            ,
+                    ,
                     new Date().getTime()));
         }
         adapter = new NotesAdapter(this,notes);

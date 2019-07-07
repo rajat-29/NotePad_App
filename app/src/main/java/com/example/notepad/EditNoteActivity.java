@@ -10,14 +10,14 @@ import android.widget.EditText;
 
 public class EditNoteActivity extends AppCompatActivity {
 
-   // private EditText inputNote;
+    // private EditText inputNote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
 
-       // inputNote = findViewById(R.id.input_note);
+        // inputNote = findViewById(R.id.input_note);
     }
 
     @Override

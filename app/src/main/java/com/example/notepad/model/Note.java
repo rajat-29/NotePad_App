@@ -1,8 +1,20 @@
 package com.example.notepad.model;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "notes")
+
 public class Note {
 
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
+    @ColumnInfo(name = "text")
     private String noteText;
+
+    @ColumnInfo(name = "date")
     private long noteDate;
 
     public Note(String noteText, long noteDate) {
@@ -24,5 +36,13 @@ public class Note {
 
     public void setNoteDate(long noteDate) {
         this.noteDate = noteDate;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
