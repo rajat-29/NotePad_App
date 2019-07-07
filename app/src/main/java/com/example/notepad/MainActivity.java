@@ -2,29 +2,30 @@ package com.example.notepad;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import com.example.notepad.adapters.NotesAdapter;
-import com.example.notepad.model.Note;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
+import com.example.notepad.adapters.NotesAdapter;
+import com.example.notepad.db.NotesDB;
+import com.example.notepad.db.NotesDao;
+import com.example.notepad.model.Note;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private ArrayList<Note> notes;
     private NotesAdapter adapter;
+    private NotesDao dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,34 +44,29 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: 05/07/2019 add new note
-                // onAddNewNote();
+                 //onAddNewNote();
                 Intent intent =  new Intent(getApplicationContext(),EditNoteActivity.class);
                 startActivity(intent);
             }
         });
+
+        dao = NotesDB.getInstance(this).notesDao();
     }
 
     private void loadNotes() {
 
         this.notes = new ArrayList<>();
-        for(int i=0;i <12;i++)
-        {
-            notes.add(new Note("this is a demo for notepad this is a demo for notepad this is a demo for notepad "
-                    ,
-                    new Date().getTime()));
-        }
-        adapter = new NotesAdapter(this,notes);
-        recyclerView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+        List<Note> list = dao.getNotes();  // get all notes from Database
+
+        this.notes.addAll(list);
+
+        this.adapter = new NotesAdapter(this,notes);
+        this.recyclerView.setAdapter(adapter);
     }
 
     private void onAddNewNote() {
 
-        if(notes != null)
-            notes.add(new Note("this is new note", new Date().getTime()));
-        if(adapter!=null)
-            adapter.notifyDataSetChanged();
-
+        startActivity(new Intent(this,EditNoteActivity.class));
 
     }
 

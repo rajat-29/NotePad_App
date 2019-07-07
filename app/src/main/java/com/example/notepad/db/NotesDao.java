@@ -9,7 +9,7 @@ import androidx.room.Update;
 
 import com.example.notepad.model.Note;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Dao
 public interface NotesDao
@@ -24,7 +24,7 @@ public interface NotesDao
     void updateNode(Note note);
 
     @Query("SELECT * FROM notes") // list all notes from Database
-    ArrayList<Note> getNotes();
+    List<Note> getNotes();
 
     @Query("SELECT * FROM notes WHERE id = :noteid") // get Note by ID
     Note getNoteById(int noteid);
