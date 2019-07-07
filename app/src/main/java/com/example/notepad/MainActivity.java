@@ -2,6 +2,7 @@ package com.example.notepad;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notepad.adapters.NotesAdapter;
+import com.example.notepad.callbacks.noteEventListener;
 import com.example.notepad.db.NotesDB;
 import com.example.notepad.db.NotesDao;
 import com.example.notepad.model.Note;
@@ -20,8 +22,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import static com.example.notepad.EditNoteActivity.Note_Extra_Key;
 
+public class MainActivity extends AppCompatActivity implements noteEventListener{
+
+    private static final String TAG = "MainActivity";
     private RecyclerView recyclerView;
     private ArrayList<Note> notes;
     private NotesAdapter adapter;
@@ -44,9 +49,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: 05/07/2019 add new note
-                 //onAddNewNote();
-                Intent intent =  new Intent(getApplicationContext(),EditNoteActivity.class);
-                startActivity(intent);
+                 onAddNewNote();
+//                Intent intent =  new Intent(getApplicationContext(),EditNoteActivity.class);
+//                startActivity(intent);
             }
         });
 
@@ -61,6 +66,10 @@ public class MainActivity extends AppCompatActivity {
         this.notes.addAll(list);
 
         this.adapter = new NotesAdapter(this,notes);
+
+        //set Listener
+        this.adapter.setListener(this);
+
         this.recyclerView.setAdapter(adapter);
     }
 
@@ -96,5 +105,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadNotes();
+    }
+
+    // when note is clicked to edit note
+    @Override
+    public void onNoteClick(Note note) {
+
+       Intent editIntent = new Intent(this,EditNoteActivity.class);
+       editIntent.putExtra(Note_Extra_Key, note.getId());
+       startActivity(editIntent);
+
+    }
+
+    // when note is long clicked
+    @Override
+    public void onNoteLongClick(Note note) {
+
+        Log.d(TAG, "onNoteLongClick :" + note.getId());
+
     }
 }

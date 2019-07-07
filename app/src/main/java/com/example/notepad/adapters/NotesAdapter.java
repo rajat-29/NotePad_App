@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notepad.R;
+import com.example.notepad.callbacks.noteEventListener;
 import com.example.notepad.model.Note;
 import com.example.notepad.utils.NoteUtils;
 
@@ -19,6 +20,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> 
 
     private ArrayList<Note> notes;
     private Context context;
+    private noteEventListener listener;
 
     public NotesAdapter(Context context,ArrayList<Note> notes)
     {
@@ -38,11 +40,29 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> 
     @Override
     public void onBindViewHolder(NoteHolder holder, int position) {
 
-        Note note = getNote(position);
+        final Note note = getNote(position);
         if(note != null)
         {
             holder.noteText.setText(note.getNoteText());
             holder.noteDate.setText(NoteUtils.dateFromLong(note.getNoteDate()));
+
+            //initilize click listener
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    listener.onNoteClick(note);
+                }
+            });
+
+            //initilize long listener
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    listener.onNoteLongClick(note);
+                    return false;
+                }
+            });
+
         }
 
     }
@@ -67,5 +87,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> 
             noteDate = itemView.findViewById(R.id.note_date);
             noteText = itemView.findViewById(R.id.note_text);
         }
+    }
+
+    public void setListener(noteEventListener listener) {
+        this.listener = listener;
     }
 }

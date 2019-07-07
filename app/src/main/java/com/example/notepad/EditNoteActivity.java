@@ -18,6 +18,8 @@ public class EditNoteActivity extends AppCompatActivity {
 
      private EditText inputNote;
      private NotesDao dao;
+     private Note temp;
+     public static final String Note_Extra_Key = "note_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +28,18 @@ public class EditNoteActivity extends AppCompatActivity {
 
          inputNote = findViewById(R.id.input_note);
          dao = NotesDB.getInstance(this).notesDao();
+
+         if(getIntent().getExtras() != null)
+         {
+             int id = getIntent().getExtras().getInt(Note_Extra_Key,0);
+             temp = dao.getNoteById(id);
+
+             inputNote.setText(temp.getNoteText());
+         }
+         else
+         {
+             temp = new Note();
+         }
     }
 
     @Override
@@ -53,8 +67,19 @@ public class EditNoteActivity extends AppCompatActivity {
         if(!text.isEmpty())
         {
             long date = new Date().getTime(); // to get date and time
-            Note note = new Note(text,date);  // create new note
-            dao.insertNode(note);  // insert node
+
+            //if note is there we will update else we will create new one
+            temp.setNoteText(text);
+            temp.setNoteDate(date);
+
+            if(temp.getId() == -1)
+            {
+                dao.insertNode(temp);
+            }
+            else
+            {
+                dao.updateNode(temp);
+            }
 
             finish(); // return to Main Activity
         }
