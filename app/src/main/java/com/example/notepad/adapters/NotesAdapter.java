@@ -16,6 +16,7 @@ import com.example.notepad.model.Note;
 import com.example.notepad.utils.NoteUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> {
 
@@ -80,6 +81,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> 
 
     }
 
+    // to get all the notes which are checked to be deleted
     @Override
     public int getItemCount() {
         return notes.size();
@@ -88,6 +90,19 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> 
     private Note getNote(int position)
     {
         return notes.get(position);
+    }
+
+    public List<Note> getCheckedNotes()
+    {
+        List<Note> checkedNotes = new ArrayList<>();
+        for(Note n : this.notes)
+        {
+            if(n.isChecked())
+            {
+                checkedNotes.add(n);
+            }
+        }
+        return checkedNotes;
     }
 
     public class NoteHolder extends RecyclerView.ViewHolder

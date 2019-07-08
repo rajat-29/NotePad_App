@@ -1,11 +1,13 @@
 package com.example.notepad;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -18,6 +20,7 @@ import com.example.notepad.callbacks.noteEventListener;
 import com.example.notepad.db.NotesDB;
 import com.example.notepad.db.NotesDao;
 import com.example.notepad.model.Note;
+import com.example.notepad.utils.NoteUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
     private FloatingActionButton fab;
     private MainActionModeCallback actionModeCallback;
     private ActionMode action;
+    private int checkCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // init fab button
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -123,10 +127,11 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
     }
 
 
+    @SuppressLint("RestrictedApi")
     @Override
     public void onNoteLongClick(Note note) {
         note.setChecked(true);
-
+        checkCount = 1;
         adapter.setMultiCheckedNode(true);
 
         // set new listener to adapter intend off MainActivity listener that we have implement
@@ -134,8 +139,40 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
             @Override
             public void onNoteClick(Note note) {
 
+                System.out.println("eaa");
+
                 note.setChecked(!note.isChecked());
+                if(note.isChecked())
+                {
+                    System.out.println("check");
+                    checkCount++;
+                }
+                else
+                {
+                    checkCount--;
+                }
+
+                // if count is greater than 1 we will hide share button
+                if(checkCount > 1)
+                {
+                    actionModeCallback.hideShareButton(false);
+                }
+
+                // else we will show share button
+                else
+                {
+                    actionModeCallback.hideShareButton(true);
+                }
+
+                // finish action bar if no note is selected
+                if(checkCount == 0)
+                {
+                    actionModeCallback.getAction().finish();
+                }
+
+
                 adapter.notifyDataSetChanged();
+                actionModeCallback.setCount(checkCount + "/" + notes.size());
 
             }
 
@@ -149,23 +186,64 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
             @Override
             public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
 
+                if(menuItem.getItemId() == R.id.action_delete_notes)
+                    deleteMultipleNotes();
+                else if(menuItem.getItemId() == R.id.action_share_notes)
+                    shareNote();
 
                 actionMode.finish();
                 return false;
             }
+
         };
 
         // start action mode
         startActionMode(actionModeCallback);
+        // set checked count of notes
+        actionModeCallback.setCount(checkCount + "/" + notes.size());
         // hide fab button
-        //fab.setVisibility(View.GONE);
+        fab.setVisibility(View.GONE);
 
     }
 
+    private void deleteMultipleNotes()
+    {
+
+        List<Note> checkedNotes = adapter.getCheckedNotes();
+        if(checkedNotes.size() != 0)
+        {
+            for(Note n : checkedNotes)
+            {
+                dao.deleteNode(n);
+            }
+            loadNotes();
+            Toast.makeText(this,checkedNotes.size() + "Note(s) are deleted", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            Toast.makeText(this,"No Notes are Selected",Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private void shareNote()
+    {
+        Note note = adapter.getCheckedNotes().get(0);
+
+        Intent s = new Intent(Intent.ACTION_SEND);
+        s.setType("text/plain");
+        String notetext = note.getNoteText() + "\\n " +
+                "Created On : " + NoteUtils.dateFromLong(note.getNoteDate());
+        s.putExtra(Intent.EXTRA_TEXT, notetext);
+        startActivity(s);
+    }
+
+    @SuppressLint("RestrictedApi")
     @Override
     public void onActionModeFinished(ActionMode mode) {
         super.onActionModeFinished(mode);
         adapter.setMultiCheckedNode(false);
         adapter.setListener(this);  // set back old listener
+        fab.setVisibility(View.VISIBLE);
     }
 }

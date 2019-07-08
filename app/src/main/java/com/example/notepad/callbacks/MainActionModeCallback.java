@@ -43,4 +43,10 @@ public abstract class MainActionModeCallback implements ActionMode.Callback {
     public ActionMode getAction() {
         return action;
     }
+
+    // hide the share button if we select more than one note
+    public void hideShareButton(boolean b)
+    {
+        shareItem.setVisible(b);
+    }
 }
