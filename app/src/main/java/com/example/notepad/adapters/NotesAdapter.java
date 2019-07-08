@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> 
     private ArrayList<Note> notes;
     private Context context;
     private noteEventListener listener;
+    private boolean multiCheckedNode = false;
 
     public NotesAdapter(Context context,ArrayList<Note> notes)
     {
@@ -32,7 +34,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> 
     @Override
     public NoteHolder onCreateViewHolder( ViewGroup parent, int viewType) {
 
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_layout,parent,false);
+        View v = LayoutInflater.from(context).inflate(R.layout.note_layout,parent,false);
 
         return new NoteHolder(v);
     }
@@ -63,6 +65,17 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> 
                 }
             });
 
+            //check wheater checkBox of note is selected
+
+            if(multiCheckedNode) {
+                holder.checkBox.setVisibility(View.VISIBLE);
+                holder.checkBox.setChecked(note.isChecked());
+            }
+            else
+            {
+                holder.checkBox.setVisibility(View.GONE);
+            }
+
         }
 
     }
@@ -81,15 +94,22 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteHolder> 
     {
 
         TextView noteText,noteDate;
+        CheckBox checkBox;
 
         public NoteHolder(@NonNull View itemView) {
             super(itemView);
             noteDate = itemView.findViewById(R.id.note_date);
             noteText = itemView.findViewById(R.id.note_text);
+            checkBox = itemView.findViewById(R.id.checkBox);
         }
     }
 
     public void setListener(noteEventListener listener) {
         this.listener = listener;
+    }
+
+    public void setMultiCheckedNode(boolean multiCheckedNode) {
+        this.multiCheckedNode = multiCheckedNode;
+        notifyDataSetChanged();
     }
 }

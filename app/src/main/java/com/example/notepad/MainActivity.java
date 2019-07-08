@@ -1,25 +1,25 @@
 package com.example.notepad;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.notepad.adapters.NotesAdapter;
+import com.example.notepad.callbacks.MainActionModeCallback;
 import com.example.notepad.callbacks.noteEventListener;
 import com.example.notepad.db.NotesDB;
 import com.example.notepad.db.NotesDao;
 import com.example.notepad.model.Note;
-import com.example.notepad.utils.NoteUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +33,9 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
     private ArrayList<Note> notes;
     private NotesAdapter adapter;
     private NotesDao dao;
+    private FloatingActionButton fab;
+    private MainActionModeCallback actionModeCallback;
+    private ActionMode action;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // init fab button
-        FloatingActionButton fab = findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -119,44 +122,50 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
 
     }
 
-    // when note is long clicked
+
     @Override
-    public void onNoteLongClick(final Note note) {
+    public void onNoteLongClick(Note note) {
+        note.setChecked(true);
 
-       new AlertDialog.Builder(this)
-               .setTitle(R.string.app_name)
-               .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                   @Override
-                   public void onClick(DialogInterface dialogInterface, int i) {
-                       dialogInterface.dismiss();
-                   }
-               })
-               .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                   @Override
-                   public void onClick(DialogInterface dialogInterface, int i) {
+        adapter.setMultiCheckedNode(true);
 
-                       dao.deleteNode(note);  // delete that note
-                       loadNotes(); // refresh the list
+        // set new listener to adapter intend off MainActivity listener that we have implement
+        adapter.setListener(new noteEventListener() {
+            @Override
+            public void onNoteClick(Note note) {
 
-                   }
-               })
-               .setNegativeButton("Share", new DialogInterface.OnClickListener() {
-                   @Override
-                   public void onClick(DialogInterface dialogInterface, int i) {
+                note.setChecked(!note.isChecked());
+                adapter.notifyDataSetChanged();
 
-                       Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            }
 
-                       String text = note.getNoteText() + "\n Created on : " +
-                               NoteUtils.dateFromLong(note.getNoteDate());
+            @Override
+            public void onNoteLongClick(Note note) {
 
-                       shareIntent.setType("text/plain");
-                       shareIntent.putExtra(Intent.EXTRA_TEXT, text);
-                       startActivity(shareIntent);
+            }
+        });
 
-                   }
-               })
-               .create()
-               .show();
+        actionModeCallback = new MainActionModeCallback() {
+            @Override
+            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
 
+
+                actionMode.finish();
+                return false;
+            }
+        };
+
+        // start action mode
+        startActionMode(actionModeCallback);
+        // hide fab button
+        //fab.setVisibility(View.GONE);
+
+    }
+
+    @Override
+    public void onActionModeFinished(ActionMode mode) {
+        super.onActionModeFinished(mode);
+        adapter.setMultiCheckedNode(false);
+        adapter.setListener(this);  // set back old listener
     }
 }
