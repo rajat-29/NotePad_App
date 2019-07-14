@@ -1,6 +1,7 @@
 package com.example.notepad;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ActionMode;
@@ -9,8 +10,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -80,6 +84,25 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
         this.adapter.setListener(this);
 
         this.recyclerView.setAdapter(adapter);
+
+        showEmptyView();
+
+        swipeToDeleteHelper.attachToRecyclerView(recyclerView);
+    }
+
+    // when note is there to display show a message
+    private void showEmptyView()
+    {
+        if(notes.size() == 0)
+        {
+            this.recyclerView.setVisibility(View.GONE);
+            findViewById(R.id.empty_notes_view).setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            this.recyclerView.setVisibility(View.VISIBLE);
+            findViewById(R.id.empty_notes_view).setVisibility(View.GONE);
+        }
     }
 
     private void onAddNewNote() {
@@ -245,5 +268,51 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
         adapter.setMultiCheckedNode(false);
         adapter.setListener(this);  // set back old listener
         fab.setVisibility(View.VISIBLE);
+    }
+
+    // swipe toleft or right to delete a note
+    private ItemTouchHelper swipeToDeleteHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+            if(notes != null)
+            {
+                Note swipedNote = notes.get(viewHolder.getAdapterPosition());
+                if(swipedNote != null)
+                swipeToDelete(swipedNote,viewHolder);
+            }
+
+        }
+    });
+
+    private void swipeToDelete(final Note swipedNote, final RecyclerView.ViewHolder viewHolder)
+    {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage("Delete Note.?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        dao.deleteNode(swipedNote);
+                        notes.remove(swipedNote);
+                        adapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+                        showEmptyView();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        recyclerView.getAdapter().notifyItemChanged(viewHolder.getAdapterPosition());
+
+                    }
+                })
+                .setCancelable(false)
+                .create().show();
     }
 }
