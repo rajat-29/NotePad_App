@@ -315,4 +315,29 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
                 .setCancelable(false)
                 .create().show();
     }
+
+    //method for back button
+    @Override
+    public void onBackPressed()
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Exit");
+        builder.setMessage("Are You Sure?");
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                finish();
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
 }
