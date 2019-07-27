@@ -340,4 +340,6 @@ public class MainActivity extends AppCompatActivity implements noteEventListener
         AlertDialog alert = builder.create();
         alert.show();
     }
+
+
 }
